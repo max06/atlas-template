@@ -1,0 +1,17 @@
+# code: language=helm
+#
+# Entry point for ATLAS-based deployments.
+# References the ATLAS system remotely — no local copy needed.
+#
+# Usage:
+#   helmfile -f helmfile.yaml.gotmpl list    # list all configured deployments and their associated labels
+#   helmfile -f helmfile.yaml.gotmpl template --selector cluster=<name>,deploymentName=<name>  # render one specific deployment, like argocd would
+
+helmfiles:
+  - path: git::https://github.com/max06/atlas.git@helmfile.yaml.gotmpl?ref=main
+    values:
+      - atlas:
+          appTemplates: templates
+          deploymentDefinitions: deployments
+          cwd: {{ exec "pwd" (list) }}
+          debug: true

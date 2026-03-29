@@ -1,0 +1,7 @@
+# Values applied to ALL clusters and deployments.
+
+# Git repository URL — used by the ATLAS ApplicationSet to discover deployments.
+# Change this to your own repository URL.
+atlas:
+  repoURL: https://github.com/max06/atlas-template.git
+  revision: HEAD

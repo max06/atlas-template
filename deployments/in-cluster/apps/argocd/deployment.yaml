@@ -1,0 +1,9 @@
+apps:
+  - template: argocd
+    namespace: argocd
+    labels:
+      bootstrap: true
+
+settings:
+  bootstrap: true
+  autosync: "false"

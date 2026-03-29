@@ -1,0 +1,24 @@
+# code: language=helm
+#
+# ATLAS ApplicationSet — discovers all ATLAS deployments and creates
+# ArgoCD Applications for each cluster/deployment pair.
+#
+# Uses a matrix generator:
+#   1. clusters: all clusters registered in ArgoCD
+#   2. git: scans the deployments directory for deployment.yaml files
+#
+# Each generated Application uses the helmfile plugin with
+# --selector flags to render exactly one cluster/deployment pair.
+
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+
+releases:
+  - name: atlas
+    chart: argo/argocd-apps
+    version: 2.0.4
+    namespace: argocd
+
+    values:
+      - appSet.yaml.gotmpl

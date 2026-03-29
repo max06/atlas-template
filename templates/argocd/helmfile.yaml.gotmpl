@@ -1,0 +1,24 @@
+# code: language=helm
+#
+# ArgoCD with argo-cd-helmfile sidecar plugin.
+# The sidecar allows ArgoCD to render helmfile-based repositories
+# like ATLAS deployments. It bundles helmfile, helm, and the
+# plugin discovery/generate logic — no manual CMP config needed.
+#
+# See: https://github.com/travisghansen/argo-cd-helmfile
+
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+
+releases:
+  - name: argocd
+    chart: argo/argo-cd
+    version: 9.4.17
+    namespace: argocd
+
+    values:
+      - values.yaml.gotmpl
+
+    strategicMergePatches:
+      - patches/repo-server.yaml

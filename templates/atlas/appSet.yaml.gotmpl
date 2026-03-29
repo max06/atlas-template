@@ -1,0 +1,79 @@
+# code: language=helm
+applicationsets:
+  atlas:
+    namespace: argocd
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+
+    goTemplate: true
+    goTemplateOptions: ["missingkey=invalid"]
+
+    generators:
+      - matrix:
+          generators:
+            # Generator 1: All clusters known to ArgoCD
+            - clusters:
+                selector: {}
+                values:
+                    clusterName: '{{`{{ or .metadata.labels.clusterId .name }}`}}'
+
+            # Generator 2: All deployment.yaml files in the repo
+            - git:
+                repoURL: {{ .Values.atlas.repoURL }}
+                revision: {{ .Values.atlas.revision | default "HEAD" }}
+                files:
+                  # Global deployments (applied to every cluster)
+                  - path: "deployments/apps/*/deployment.yaml"
+                  # Cluster-specific deployments
+                  - path: "deployments/{{`{{ .values.clusterName }}`}}/apps/*/deployment.yaml"
+                values:
+                  appInstance: '{{ printf "%s" "{{- printf `{{ .path.basename }}` -}}" }}'
+                  appInstancePath: '{{ printf "%s" "{{- printf `{{ .path.path }}` -}}" }}'
+
+    syncPolicy:
+      applicationsSync: create-only
+
+    template:
+      metadata:
+        name: '{{`{{ .values.clusterName }}-{{ .values.appInstance }}`}}'
+      spec:
+        project: '{{`{{ get .settings "project" | default "default" }}`}}'
+        destination:
+          name: '{{`{{ .values.clusterName }}`}}'
+          namespace: '{{`{{ or .settings.namespace .values.appInstance }}`}}'
+        syncPolicy:
+          syncOptions:
+            - CreateNamespace=true
+          automated:
+            enabled: false
+            prune: true
+            allowEmpty: false
+            selfHeal: true
+          retry:
+            refresh: true
+
+    templatePatch: |
+      spec:
+        syncPolicy:
+          automated:
+            enabled: {{`{{ eq (get .settings "autosync" | default "false") "true" }}`}}
+        sources:
+          - repoURL: {{ .Values.atlas.repoURL }}
+            targetRevision: {{`{{ get .settings "branch" | default "HEAD" }}`}}
+            path: .
+            plugin:
+              env:
+                {{`{{- if (or .settings.namespace false) }}`}}
+                - name: HELMFILE_USE_CONTEXT_NAMESPACE
+                  value: "true"
+                {{`{{- end }}`}}
+                - name: HELMFILE_GLOBAL_OPTIONS
+                  value: "--selector cluster={{`{{ .values.clusterName }}`}},deploymentName={{`{{ .values.appInstance }}`}}"
+                - name: HELMFILE_TEMPLATE_OPTIONS
+                  value: "--skip-schema-validation"
+                - name: HELM_TEMPLATE_OPTIONS
+                  value: "--skip-schema-validation"
+        {{`{{- if (or .settings.ignoreDifferences false) }}`}}
+        ignoreDifferences:
+          {{`{{ .settings.ignoreDifferences | toYaml | nindent 6 }}`}}
+        {{`{{- end }}`}}

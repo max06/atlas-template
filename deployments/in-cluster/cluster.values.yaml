@@ -1,0 +1,2 @@
+# Values applied to all deployments on in-cluster.
+domain: in-cluster.mydomain.tld
