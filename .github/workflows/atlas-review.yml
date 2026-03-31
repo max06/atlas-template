@@ -1,10 +1,7 @@
-name: ATLAS Snapshot Review
+name: ATLAS Review
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   review:
