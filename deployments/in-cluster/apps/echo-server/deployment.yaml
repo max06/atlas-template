@@ -1,0 +1,3 @@
+apps:
+  - template: echo-server
+    namespace: echo-server
