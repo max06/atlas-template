@@ -8,10 +8,9 @@
 #   helmfile -f helmfile.yaml.gotmpl template --selector cluster=<name>,deploymentName=<name>  # render one specific deployment, like argocd would
 
 helmfiles:
-  - path: git::https://github.com/max06/atlas.git@helmfile.yaml.gotmpl?ref=main
+  - path: git::https://github.com/max06/atlas.git@helmfile.yaml.gotmpl?ref=v0.1.0
     values:
       - atlas:
           appTemplates: templates
           deploymentDefinitions: deployments
           cwd: {{ exec "pwd" (list) }}
-          debug: true

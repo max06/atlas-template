@@ -70,9 +70,9 @@ applicationsets:
                 - name: HELMFILE_GLOBAL_OPTIONS
                   value: "--selector cluster={{`{{ .values.clusterName }}`}},deploymentName={{`{{ .values.appInstance }}`}}"
                 - name: HELMFILE_TEMPLATE_OPTIONS
-                  value: "--skip-schema-validation"
+                  value: "--skip-schema-validation --include-crds"
                 - name: HELM_TEMPLATE_OPTIONS
-                  value: "--skip-schema-validation"
+                  value: "--skip-schema-validation --include-crds"
         {{`{{- if (or .settings.ignoreDifferences false) }}`}}
         ignoreDifferences:
           {{`{{ .settings.ignoreDifferences | toYaml | nindent 6 }}`}}
